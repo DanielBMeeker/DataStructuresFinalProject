@@ -33,7 +33,7 @@ class QueueEmptyException(Exception):
 
 
 class Queue:
-    def __init__(self, max_size=5):
+    def __init__(self, max_size=float('inf')):
         self.head = 0
         # self.tail = 0 not used because of my use of the built-in remove function for
         # Python lists which adjusts the indexes of the queue automatically.
