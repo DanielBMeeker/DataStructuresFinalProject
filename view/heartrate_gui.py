@@ -62,6 +62,22 @@ def get_max_heart_rate(age):
     return max_hr
 
 
+def highest_rate(queue):
+    global dates_entered_list
+    highest_heart_rate = 0
+    print(queue.print_queue())
+    for i in range(len(dates_entered_list)):
+        current_map_object = queue.items[i]
+        heart_rate_of_date = current_map_object.find_value_of_key(dates_entered_list[i])
+        if int(float(heart_rate_of_date)) > highest_heart_rate:
+            highest_heart_rate = int(float(heart_rate_of_date))
+    return highest_heart_rate
+
+
+def lowest_rate(queue):
+    pass
+
+
 def my_click():
     """
     This function grabs all the data in the fields and validates it
@@ -71,10 +87,7 @@ def my_click():
     global LOW_RATE_WARNING
     global HIGH_RESTING_RATE
     global age
-
-    # get max heart rate
-    age = age_entry.get()
-    max_heart_rate = get_max_heart_rate(age)
+    global dates_entered_list
 
     # clear success output
     global my_label2
@@ -84,15 +97,10 @@ def my_click():
     my_label2 = Label(root)
     my_label2.grid(row=5, column=0)
 
-    # create instances of resting and active rate maps
-    resting_map = map()
-    active_map = map()
-
     # get date from calendar
     date = grab_date()
 
     # add date to global dates entered list for use in validation step
-    global dates_entered_list
     if date not in dates_entered_list:
         dates_entered_list.append(date)
     else:
@@ -100,11 +108,25 @@ def my_click():
         my_label2.config(text="Entry Not Successful")
         return
 
+    # get max heart rate
+    age = age_entry.get()
+    if age.strip() == "" or int(float(age)) < 0 or int(float(age)) > 125:
+        messagebox.showwarning("Age Error", "Not a valid age")
+        dates_entered_list.remove(date)
+        my_label2.config(text="Entry Not Successful")
+        return
+    if 0 < int(float(age)) <= 125:
+        max_heart_rate = get_max_heart_rate(age)
+
+    # create instances of resting and active rate maps
+    resting_map = map()
+    active_map = map()
+
     # read entry's for rate
     resting_rate = resting_entry.get()
     active_rate = active_entry.get()
 
-    # validate entries
+    # validate heart rate entries
     if resting_rate.strip() == "" or active_rate.strip() == "":
         messagebox.showwarning("Heart Rate Entry Error", "Heart Rate can't be blank")
         dates_entered_list.remove(date)
@@ -135,16 +157,20 @@ def my_click():
     active_rate_queue.enqueue(active_map)
     resting_rate_queue.enqueue(resting_map)
 
-    # date_entry.delete(0, END)
+    # clear heart rate entry fields
     resting_entry.delete(0, END)
     active_entry.delete(0, END)
 
+    # indicate success
     my_label2.config(text="Entry Successful")
+
+    # copy queue to pass to highest_rate function
+    copy_active_queue = active_rate_queue
 
     output_label = Label(root, text="Resting:  " + str(resting_rate_queue.print_queue()))
     output_label.grid(row=5, column=1)
 
-    output_label = Label(root, text="Active:  " + str(active_rate_queue.print_queue()))
+    output_label = Label(root, text="Highest Active:  " + str(highest_rate(copy_active_queue)))
     output_label.grid(row=6, column=1)
 
 
