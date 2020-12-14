@@ -65,7 +65,6 @@ def get_max_heart_rate(age):
 def highest_rate(queue):
     global dates_entered_list
     highest_heart_rate = 0
-    print(queue.print_queue())
     for i in range(len(dates_entered_list)):
         current_map_object = queue.items[i]
         heart_rate_of_date = current_map_object.find_value_of_key(dates_entered_list[i])
@@ -75,7 +74,15 @@ def highest_rate(queue):
 
 
 def lowest_rate(queue):
-    pass
+    global dates_entered_list
+    global age
+    lowest_rate = get_max_heart_rate(age)
+    for i in range(len(dates_entered_list)):
+        current_map_object = queue.items[i]
+        heart_rate_of_date = current_map_object.find_value_of_key(dates_entered_list[i])
+        if int(float(heart_rate_of_date)) < lowest_rate:
+            lowest_rate = int(float(heart_rate_of_date))
+    return lowest_rate
 
 
 def my_click():
@@ -167,11 +174,17 @@ def my_click():
     # copy queue to pass to highest_rate function
     copy_active_queue = active_rate_queue
 
-    output_label = Label(root, text="Resting:  " + str(resting_rate_queue.print_queue()))
+    output_label = Label(root, text="Lowest Resting:  " + str(lowest_rate(resting_rate_queue)))
     output_label.grid(row=5, column=1)
 
     output_label = Label(root, text="Highest Active:  " + str(highest_rate(copy_active_queue)))
     output_label.grid(row=6, column=1)
+
+    output_label = Label(root, text="Active Rates:  " + str(active_rate_queue.print_queue()))
+    output_label.grid(row=7, columnspan=2)
+
+    output_label = Label(root, text="Resting Rates:  " + str(resting_rate_queue.print_queue()))
+    output_label.grid(row=8, columnspan=2)
 
 
 my_button = Button(root, text="Submit Entry!", padx=50, command=my_click)
