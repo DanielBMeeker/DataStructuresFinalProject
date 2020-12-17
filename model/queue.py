@@ -113,7 +113,7 @@ class Queue:
 
     def print_queue(self):
         if not self.is_empty():
-            stack_str = ""
+            stack_str = "\n"
             for x in range(self.size()):
                 stack_str += str(self.items[x]) + "\n"
             return stack_str

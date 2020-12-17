@@ -1,3 +1,21 @@
+"""
+Program: heartrate_gui.py
+Author: Daniel Meeker
+Date: 12/17/2020
+Course: CIS 152 - Data Structure
+Version: 1.0
+OS: Windows 10
+IDE: Pycharm
+Copyright : This is my own original work
+based on specifications issued by our instructor
+Description : This app will allow a user to input heart rates and
+validates the information that they enter. It saves the data and
+sorts the data before displaying it back to the user.
+Academic Honesty: I attest that this is my original work.
+I have not used unauthorized source code, either modified or
+unmodified. I have not given other fellow student(s) access
+to my program.
+"""
 from tkinter import *
 from tkinter import messagebox
 from tkcalendar import *
@@ -219,23 +237,23 @@ def submit_click():
     sorted_resting_queue = sort_lowest_to_highest(resting_rate_queue)
     sorted_active_queue = sort_lowest_to_highest(active_rate_queue)
 
-    output_label_lr = Label(root, text="Lowest Resting:  " + str(lowest_rate(resting_rate_queue)))
+    output_label_lr = Label(root, text="Lowest Resting:  " + str(lowest_rate(resting_rate_queue)) + " bpm")
     output_label_lr.grid(row=5, column=1)
 
-    output_label_ha = Label(root, text="Highest Active:  " + str(highest_rate(copy_active_queue)))
+    output_label_ha = Label(root, text="Highest Active:  " + str(highest_rate(copy_active_queue)) + " bpm")
     output_label_ha.grid(row=6, column=1)
 
     output_label_ar = Label(root, text="Active Rates:  " + str(active_rate_queue.print_queue()))
-    output_label_ar.grid(row=7, column=0)
+    output_label_ar.grid(row=8, column=0)
 
     output_label_rr = Label(root, text="Resting Rates:  " + str(resting_rate_queue.print_queue()))
-    output_label_rr.grid(row=8, column=0)
+    output_label_rr.grid(row=7, column=0)
 
     output_label_sar = Label(root, text="Lowest-to-Highest Active Rates:  " + str(sorted_active_queue.print_queue()))
-    output_label_sar.grid(row=7, column=1)
+    output_label_sar.grid(row=8, column=1)
 
     output_label_srr = Label(root, text="Lowest-to-Highest Resting Rates:  " + str(sorted_resting_queue.print_queue()))
-    output_label_srr.grid(row=8, column=1)
+    output_label_srr.grid(row=7, column=1)
 
 
 submit_button = Button(root, text="Submit Entry!", padx=50, command=submit_click)
