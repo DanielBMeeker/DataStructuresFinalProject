@@ -64,6 +64,11 @@ def get_max_heart_rate(age):
 
 
 def highest_rate(queue):
+    """
+    This function will find the highest heart rate of whichever queue is passed into it
+    :param queue: required
+    :return: int
+    """
     global dates_entered_list
     highest_heart_rate = 0
     for i in range(len(dates_entered_list)):
@@ -75,6 +80,11 @@ def highest_rate(queue):
 
 
 def lowest_rate(queue):
+    """
+    This function will find the lowest heart rate of a given queue
+    :param queue: required
+    :return: int
+    """
     global dates_entered_list
     global age
     lowest_rate = get_max_heart_rate(age)
@@ -87,13 +97,19 @@ def lowest_rate(queue):
 
 
 def sort_lowest_to_highest(input_queue):
+    """
+    This function will sort a queue using selection sort by heart rate from lowest to highest.
+    It will maintain the associated date with each heart rate.
+    :param input_queue: required
+    :return: queue object
+    """
     global dates_entered_list
     sorted_queue = queue.Queue()
     list_of_heart_rates = []
     # get a list of all heart rates from the map objects
     for i in range(len(dates_entered_list)):
-        current_map_oject = input_queue.items[i]
-        heart_rate_of_date = current_map_oject.find_value_of_key(dates_entered_list[i])
+        current_map_object = input_queue.items[i]
+        heart_rate_of_date = current_map_object.find_value_of_key(dates_entered_list[i])
         list_of_heart_rates.append(heart_rate_of_date)
     # do a selection sort on the list of heart rates
     for i in range(len(dates_entered_list)):
@@ -102,7 +118,6 @@ def sort_lowest_to_highest(input_queue):
             if list_of_heart_rates[min_value] > list_of_heart_rates[j]:
                 min_value = j
         list_of_heart_rates[i], list_of_heart_rates[min_value] = list_of_heart_rates[min_value], list_of_heart_rates[i]
-    # print(list_of_heart_rates)
     # Build the sorted queue of map objects from the sorted list of heart rates
     for i in range(len(dates_entered_list)):
         for j in range(len(dates_entered_list)):
