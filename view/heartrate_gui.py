@@ -7,19 +7,20 @@ from model.map import MapMeeker as map
 root = Tk()
 root.title("Heart Rate Entry")
 
+# global variables
+date = ''
+dates_entered_list = []
+success_label = Label(root)
+LOW_RATE_WARNING = 60
+HIGH_RESTING_RATE = 100
+age = ''
+sorted_queue = queue.Queue()
+
 """Widgets"""
 # date entry widget using tkcalendar
 
 cal = Calendar(root, selectmode="day")
 cal.grid(row=0, column=1)
-date = ''
-dates_entered_list = []
-my_label2 = Label(root)
-LOW_RATE_WARNING = 60
-HIGH_RESTING_RATE = 100
-age = ''
-
-
 date_label = Label(root, text="Enter the Date")
 date_label.grid(row=0, column=0)
 
@@ -85,7 +86,32 @@ def lowest_rate(queue):
     return lowest_rate
 
 
-def my_click():
+def sort_lowest_to_highest(input_queue):
+    global dates_entered_list
+    sorted_queue = queue.Queue()
+    list_of_heart_rates = []
+    # get a list of all heart rates from the map objects
+    for i in range(len(dates_entered_list)):
+        current_map_oject = input_queue.items[i]
+        heart_rate_of_date = current_map_oject.find_value_of_key(dates_entered_list[i])
+        list_of_heart_rates.append(heart_rate_of_date)
+    # do a selection sort on the list of heart rates
+    for i in range(len(dates_entered_list)):
+        min_value = i
+        for j in range(i+1, len(dates_entered_list)):
+            if list_of_heart_rates[min_value] > list_of_heart_rates[j]:
+                min_value = j
+        list_of_heart_rates[i], list_of_heart_rates[min_value] = list_of_heart_rates[min_value], list_of_heart_rates[i]
+    # print(list_of_heart_rates)
+    # Build the sorted queue of map objects from the sorted list of heart rates
+    for i in range(len(dates_entered_list)):
+        for j in range(len(dates_entered_list)):
+            if input_queue.items[j].find_value_of_key(dates_entered_list[j]) == list_of_heart_rates[i]:
+                sorted_queue.enqueue(input_queue.items[j])
+    return sorted_queue
+
+
+def submit_click():
     """
     This function grabs all the data in the fields and validates it
     :return:
@@ -97,12 +123,12 @@ def my_click():
     global dates_entered_list
 
     # clear success output
-    global my_label2
-    my_label2.destroy()
+    global success_label
+    success_label.destroy()
 
     # Ready a new success output
-    my_label2 = Label(root)
-    my_label2.grid(row=5, column=0)
+    success_label = Label(root)
+    success_label.grid(row=5, column=0)
 
     # get date from calendar
     date = grab_date()
@@ -112,7 +138,7 @@ def my_click():
         dates_entered_list.append(date)
     else:
         messagebox.showwarning("Date Warning", "Date already used.")
-        my_label2.config(text="Entry Not Successful")
+        success_label.config(text="Entry Not Successful")
         return
 
     # get max heart rate
@@ -120,7 +146,7 @@ def my_click():
     if age.strip() == "" or int(float(age)) < 0 or int(float(age)) > 125:
         messagebox.showwarning("Age Error", "Not a valid age")
         dates_entered_list.remove(date)
-        my_label2.config(text="Entry Not Successful")
+        success_label.config(text="Entry Not Successful")
         return
     if 0 < int(float(age)) <= 125:
         max_heart_rate = get_max_heart_rate(age)
@@ -137,24 +163,24 @@ def my_click():
     if resting_rate.strip() == "" or active_rate.strip() == "":
         messagebox.showwarning("Heart Rate Entry Error", "Heart Rate can't be blank")
         dates_entered_list.remove(date)
-        my_label2.config(text="Entry Not Successful")
+        success_label.config(text="Entry Not Successful")
         return
     if int(float(resting_rate)) < 0 or int(float(active_rate)) < 0:
         messagebox.showwarning("Heart Rate Entry Error", "Heart Rate Can't Be Negative!")
         dates_entered_list.remove(date)
-        my_label2.config(text="Entry Not Successful")
+        success_label.config(text="Entry Not Successful")
         return
     if int(float(resting_rate)) > int(float(active_rate)):
         messagebox.showwarning("Heart Rate Entry Error", "Resting Rate Should Be Lower Than Active Rate!")
         dates_entered_list.remove(date)
-        my_label2.config(text="Entry Not Successful")
+        success_label.config(text="Entry Not Successful")
         return
     if int(float(resting_rate)) <= LOW_RATE_WARNING:
         messagebox.showwarning("Low Rate Warning", "Heart Rate is Low.")
     if int(float(resting_rate)) >= HIGH_RESTING_RATE:
-        messagebox.showwarning("High Rate Warning", "Heart Rate is Elevated")
+        messagebox.showwarning("High Rate Warning", "Resting Heart Rate is Elevated")
     if int(float(active_rate)) >= max_heart_rate:
-        messagebox.showwarning("High Rate Warning", "Heart Rate Dangerously High")
+        messagebox.showwarning("High Rate Warning", "Active Heart Rate Dangerously High")
 
     # insert info into map
     resting_map.insert(date, resting_rate)
@@ -169,26 +195,36 @@ def my_click():
     active_entry.delete(0, END)
 
     # indicate success
-    my_label2.config(text="Entry Successful")
+    success_label.config(text="Entry Successful")
 
     # copy queue to pass to highest_rate function
     copy_active_queue = active_rate_queue
 
-    output_label = Label(root, text="Lowest Resting:  " + str(lowest_rate(resting_rate_queue)))
-    output_label.grid(row=5, column=1)
+    # create sorted queues
+    sorted_resting_queue = sort_lowest_to_highest(resting_rate_queue)
+    sorted_active_queue = sort_lowest_to_highest(active_rate_queue)
 
-    output_label = Label(root, text="Highest Active:  " + str(highest_rate(copy_active_queue)))
-    output_label.grid(row=6, column=1)
+    output_label_lr = Label(root, text="Lowest Resting:  " + str(lowest_rate(resting_rate_queue)))
+    output_label_lr.grid(row=5, column=1)
 
-    output_label = Label(root, text="Active Rates:  " + str(active_rate_queue.print_queue()))
-    output_label.grid(row=7, columnspan=2)
+    output_label_ha = Label(root, text="Highest Active:  " + str(highest_rate(copy_active_queue)))
+    output_label_ha.grid(row=6, column=1)
 
-    output_label = Label(root, text="Resting Rates:  " + str(resting_rate_queue.print_queue()))
-    output_label.grid(row=8, columnspan=2)
+    output_label_ar = Label(root, text="Active Rates:  " + str(active_rate_queue.print_queue()))
+    output_label_ar.grid(row=7, column=0)
+
+    output_label_rr = Label(root, text="Resting Rates:  " + str(resting_rate_queue.print_queue()))
+    output_label_rr.grid(row=8, column=0)
+
+    output_label_sar = Label(root, text="Lowest-to-Highest Active Rates:  " + str(sorted_active_queue.print_queue()))
+    output_label_sar.grid(row=7, column=1)
+
+    output_label_srr = Label(root, text="Lowest-to-Highest Resting Rates:  " + str(sorted_resting_queue.print_queue()))
+    output_label_srr.grid(row=8, column=1)
 
 
-my_button = Button(root, text="Submit Entry!", padx=50, command=my_click)
-my_button.grid(row=4, columnspan=2)
+submit_button = Button(root, text="Submit Entry!", padx=50, command=submit_click)
+submit_button.grid(row=4, columnspan=2)
 
 resting_rate_queue = queue.Queue()
 active_rate_queue = queue.Queue()
